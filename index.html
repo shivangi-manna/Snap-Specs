@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- TensorFlow.js for real-time image identification -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
 </head>
 <body>
     <div class="background-blobs">
@@ -43,6 +46,15 @@
                         <h3>Drop your image here</h3>
                         <p>or click to browse files</p>
                     </div>
+                </div>
+                
+                <div class="search-divider">
+                    <span>OR SEARCH MANUALLY</span>
+                </div>
+
+                <div class="manual-search">
+                    <input type="text" id="manual-search-input" placeholder="Type what you're looking for...">
+                    <button id="search-btn" class="btn-primary">Search</button>
                 </div>
             </div>
         </section>

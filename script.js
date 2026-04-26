@@ -7,6 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultTitle = document.getElementById('result-title');
     const resultTags = document.getElementById('result-tags');
     const hero = document.querySelector('.hero');
+    const manualSearchInput = document.getElementById('manual-search-input');
+    const searchBtn = document.getElementById('search-btn');
+
+    let model = null;
+
+    // Load MobileNet Model
+    async function loadModel() {
+        console.log("Loading model...");
+        model = await mobilenet.load();
+        console.log("Model loaded!");
+    }
+    loadModel();
 
     // Handle drag and drop
     dropZone.addEventListener('click', () => fileInput.click());
@@ -34,61 +46,105 @@ document.addEventListener('DOMContentLoaded', () => {
         if (file) handleImageUpload(file);
     });
 
+    // Handle Manual Search
+    searchBtn.addEventListener('click', () => {
+        const query = manualSearchInput.value.trim();
+        if (query) {
+            performSearch(query, null);
+        }
+    });
+
+    manualSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = manualSearchInput.value.trim();
+            if (query) performSearch(query, null);
+        }
+    });
+
     function handleImageUpload(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
+            const imgUrl = e.target.result;
             // Show preview
-            imagePreview.style.backgroundImage = `url(${e.target.result})`;
+            imagePreview.style.backgroundImage = `url(${imgUrl})`;
             
+            // Create a temporary image element for the model
+            const tempImg = new Image();
+            tempImg.src = imgUrl;
+            tempImg.onload = () => identifyImage(tempImg);
+
             // UI Transitions
             hero.style.display = 'none';
             resultsSection.classList.remove('hidden');
-            
-            // Scroll to results
             window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Simulate AI Processing
-            simulateAIAnalysis();
         };
         reader.readAsDataURL(file);
     }
 
-    function simulateAIAnalysis() {
-        resultTitle.textContent = "Analyzing Image...";
+    async function identifyImage(imgElement) {
+        resultTitle.textContent = "Analyzing Content...";
         resultTags.innerHTML = '';
         imageGrid.innerHTML = '';
 
-        // Random mock categories for "identification"
-        const categories = [
-            { title: "Futuristic Architecture", tags: ["Modern", "Minimalist", "Glass", "Structure"], search: "architecture" },
-            { title: "Alpine Landscape", tags: ["Nature", "Mountains", "Snow", "Outdoor"], search: "mountain" },
-            { title: "Premium Tech Gear", tags: ["Electronic", "Gadget", "Sleek", "Dark"], search: "technology" },
-            { title: "Urban Streetwear", tags: ["Fashion", "Style", "City", "Modern"], search: "fashion" }
-        ];
+        if (!model) {
+            resultTitle.textContent = "Loading AI Engine...";
+            await loadModel();
+        }
 
-        const match = categories[Math.floor(Math.random() * categories.length)];
-
-        setTimeout(() => {
-            resultTitle.textContent = match.title;
+        try {
+            const predictions = await model.classify(imgElement);
+            console.log('Predictions: ', predictions);
             
-            match.tags.forEach(tagText => {
+            if (predictions && predictions.length > 0) {
+                const topPrediction = predictions[0].className.split(',')[0];
+                const tags = predictions.map(p => p.className.split(',')[0]);
+                performSearch(topPrediction, tags);
+            } else {
+                performSearch("Unknown Object", ["General"]);
+            }
+        } catch (error) {
+            console.error("Analysis failed", error);
+            performSearch("Error", ["Failed"]);
+        }
+    }
+
+    async function performSearch(query, tags) {
+        // UI Transitions for manual search if hero is still visible
+        if (hero.style.display !== 'none') {
+            hero.style.display = 'none';
+            resultsSection.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        resultTitle.textContent = query;
+        resultTags.innerHTML = '';
+        
+        if (tags) {
+            tags.forEach(tagText => {
                 const tag = document.createElement('span');
                 tag.className = 'tag';
                 tag.textContent = tagText;
                 resultTags.appendChild(tag);
             });
+        } else {
+            // If manual search, just show the query as a tag
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = query;
+            resultTags.appendChild(tag);
+        }
 
-            // Generate mock similar images
-            for (let i = 0; i < 6; i++) {
-                const item = document.createElement('div');
-                item.className = 'grid-item glass-card';
-                const img = document.createElement('img');
-                // Use Unsplash source for high-quality mock images
-                img.src = `https://source.unsplash.com/featured/?${match.search}&sig=${i + Math.random()}`;
-                img.alt = "Similar result";
-                item.appendChild(img);
-                imageGrid.appendChild(item);
-            }
-        }, 2500); // 2.5s simulated scan
+        imageGrid.innerHTML = '';
+        // Fetch real images from Unsplash
+        for (let i = 0; i < 9; i++) {
+            const item = document.createElement('div');
+            item.className = 'grid-item glass-card';
+            const img = document.createElement('img');
+            img.src = `https://source.unsplash.com/featured/?${encodeURIComponent(query)}&sig=${i + Math.random()}`;
+            img.alt = query;
+            img.loading = "lazy";
+            item.appendChild(img);
+            imageGrid.appendChild(item);
+        }
     }
 });

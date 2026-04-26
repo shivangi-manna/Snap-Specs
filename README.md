@@ -1,7 +1,7 @@
 # <div align="center">🔍 SNAP SPECS</div>
 
 <div align="center">
-  <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop" width="100%" alt="Snap Specs Banner" />
+  <img src="assets/preview.png" width="100%" alt="Snap Specs Banner" />
   <br />
   <p align="center">
     <b>AI-Powered Visual Search & Image Identification Tool</b>

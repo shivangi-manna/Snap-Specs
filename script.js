@@ -10,12 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const manualSearchInput = document.getElementById('manual-search-input');
     const searchBtn = document.getElementById('search-btn');
     const confidenceBar = document.getElementById('confidence-bar');
+    const historyGrid = document.getElementById('history-grid');
     
     const lensSearchBtn = document.getElementById('lens-search');
     const googleSearchBtn = document.getElementById('google-search');
 
     let model = null;
     let currentPrediction = "";
+    let history = JSON.parse(localStorage.getItem('snap_specs_history') || '[]');
 
     // Load MobileNet Model
     async function loadModel() {
@@ -24,6 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Model loaded!");
     }
     loadModel();
+    renderHistory();
+
+    // Scroll Reveal Logic
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+    });
 
     // Action Buttons Logic
     lensSearchBtn.addEventListener('click', () => {
@@ -85,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tempImg = new Image();
             tempImg.src = imgUrl;
-            tempImg.onload = () => identifyImage(tempImg);
+            tempImg.onload = () => identifyImage(tempImg, imgUrl);
 
             hero.style.display = 'none';
             resultsSection.classList.remove('hidden');
@@ -94,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     }
 
-    async function identifyImage(imgElement) {
+    async function identifyImage(imgElement, originalUrl) {
         resultTitle.textContent = "Analyzing Content...";
         resultTags.innerHTML = '';
         imageGrid.innerHTML = '';
@@ -111,6 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const topPrediction = predictions[0].className.split(',')[0];
                 const confidence = predictions[0].probability;
                 const tags = predictions.map(p => p.className.split(',')[0]);
+                
+                addToHistory(topPrediction, originalUrl);
                 performSearch(topPrediction, tags, confidence);
             } else {
                 performSearch("Unknown Object", ["General"], 0.1);
@@ -119,6 +137,28 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Analysis failed", error);
             performSearch("Error", ["Failed"], 0);
         }
+    }
+
+    function addToHistory(query, imgUrl) {
+        const item = { query, imgUrl, date: new Date().getTime() };
+        history = [item, ...history.slice(0, 7)];
+        localStorage.setItem('snap_specs_history', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (!historyGrid) return;
+        if (history.length === 0) {
+            historyGrid.innerHTML = '<p class="empty-msg">No recent scans. Start by uploading an image!</p>';
+            return;
+        }
+
+        historyGrid.innerHTML = history.map(item => `
+            <div class="history-item glass-card reveal" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                <div class="thumb" style="background-image: url(${item.imgUrl})"></div>
+                <p>${item.query}</p>
+            </div>
+        `).join('');
     }
 
     async function performSearch(query, tags, confidence) {
@@ -148,21 +188,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         imageGrid.innerHTML = '';
-        // Use a more reliable Unsplash URL pattern
+        const providers = [
+            (q, s) => `https://source.unsplash.com/400x400/?${q}&sig=${s}`,
+            (q, s) => `https://loremflickr.com/400/400/${q}?lock=${s}`,
+            (q, s) => `https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80&sig=${s}&keyword=${q}`
+        ];
+
         for (let i = 0; i < 9; i++) {
             const item = document.createElement('div');
-            item.className = 'grid-item glass-card';
+            item.className = 'grid-item glass-card reveal';
             const img = document.createElement('img');
-            // Adding more parameters to make it more reliable
             const randomSig = Math.floor(Math.random() * 1000);
-            img.src = `https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80&sig=${randomSig}&keyword=${encodeURIComponent(query)}`;
-            // Note: The above is a fallback, Unsplash source is better if it works. 
-            // Let's try the keyword-based source again but with a specific width
-            img.src = `https://source.unsplash.com/400x400/?${encodeURIComponent(query)}&sig=${randomSig}`;
+            
+            // Cycle through providers to ensure variety and reliability
+            const provider = providers[i % providers.length];
+            img.src = provider(encodeURIComponent(query), randomSig);
             img.alt = query;
-            img.onerror = function() {
-                this.src = `https://loremflickr.com/400/400/${encodeURIComponent(query)}?lock=${randomSig}`;
-            };
+            img.loading = "lazy";
+            
             item.appendChild(img);
             imageGrid.appendChild(item);
         }

@@ -325,6 +325,58 @@ nav {
     opacity: 1;
 }
 
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.confidence-meter {
+    width: 150px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-accent));
+    transition: 1s ease-out;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+}
+
+.btn-secondary img {
+    width: 20px;
+}
+
 /* Search Divider */
 .search-divider {
     margin: 2rem 0;

@@ -20,6 +20,10 @@ body {
     font-family: var(--font-main);
     overflow-x: hidden;
     line-height: 1.6;
+    user-select: none; /* Disable text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 /* Background Blobs */

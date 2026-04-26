@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap Specs | AI-Powered Image Identifier</title>
+    <meta name="description" content="Discover the world through your lens. Snap Specs uses advanced AI to identify images and find visually similar matches instantly.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <nav>
+        <div class="logo">SNAP<span>SPECS</span></div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#how-it-works">How it Works</a>
+            <button class="btn-primary mini">Get Started</button>
+        </div>
+    </nav>
+
+    <main id="home">
+        <section class="hero">
+            <h1 class="reveal-text">See Beyond the <span>Surface</span></h1>
+            <p class="subtitle">Upload any image and let our neural engine identify, analyze, and find visually similar matches across the web.</p>
+            
+            <div class="upload-container" id="drop-zone">
+                <div class="glass-card upload-box">
+                    <input type="file" id="file-input" hidden accept="image/*">
+                    <div class="upload-content">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 16V8M12 8L9 11M12 8L15 11M7 16.8H17C18.1046 16.8 19 15.9046 19 14.8V11.2C19 10.0954 18.1046 9.2 17 9.2H16M7 16.8C5.89543 16.8 5 15.9046 5 14.8V11.2C5 10.0954 5.89543 9.2 7 9.2H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Drop your image here</h3>
+                        <p>or click to browse files</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-section hidden" id="results-section">
+            <div class="analysis-panel">
+                <div class="glass-card preview-card">
+                    <div class="image-preview" id="image-preview"></div>
+                    <div class="scanning-line"></div>
+                </div>
+                <div class="analysis-info">
+                    <h2 id="result-title">Analyzing...</h2>
+                    <div class="tags" id="result-tags">
+                        <!-- Tags will be injected here -->
+                    </div>
+                    <p id="result-description">Our AI is processing the visual features of your image to find the best matches.</p>
+                </div>
+            </div>
+
+            <div class="similar-images">
+                <h3>Visually Similar Results</h3>
+                <div class="image-grid" id="image-grid">
+                    <!-- Similar images will be injected here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Snap Specs. Built with ❤️ by Shivangi Manna.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
